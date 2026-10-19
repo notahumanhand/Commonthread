@@ -4,104 +4,20 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#234b36">
-    <meta name="description" content="Commonthread is currently in progress.">
+    <meta name="description" content="Commonthread project landing page.">
     <title>Commonthread</title>
-    <style>
-        :root {
-            color-scheme: light;
-            --green-deep: #234b36;
-            --green: #386641;
-            --green-light: #6b8f71;
-            --gold: #d4a843;
-            --tan: #e8d8b8;
-            --brown: #6f5038;
-            --cream: #f7f3e8;
-            --text: #26352a;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html, body {
-            min-height: 100%;
-        }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            display: grid;
-            place-items: center;
-            padding: 2rem;
-            color: var(--text);
-            background:
-                radial-gradient(ellipse at 15% 15%, rgba(212, 168, 67, 0.20), transparent 42%),
-                radial-gradient(ellipse at 85% 85%, rgba(56, 102, 65, 0.16), transparent 45%),
-                var(--cream);
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        }
-
-        main {
-            width: min(100%, 760px);
-            padding: clamp(2.5rem, 8vw, 5.5rem) clamp(1.5rem, 6vw, 4.5rem);
-            text-align: center;
-            background: rgba(255, 253, 247, 0.94);
-            border: 1px solid rgba(111, 80, 56, 0.18);
-            border-top: 6px solid var(--gold);
-            border-radius: 18px;
-            box-shadow: 0 24px 70px rgba(35, 75, 54, 0.12);
-        }
-
-        .accent {
-            width: 64px;
-            height: 4px;
-            margin: 0 auto 1.5rem;
-            border-radius: 999px;
-            background: linear-gradient(90deg, var(--green), var(--gold), var(--brown));
-        }
-
-        h1 {
-            margin: 0;
-            color: var(--green-deep);
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: clamp(2.8rem, 8vw, 5rem);
-            font-weight: 600;
-            letter-spacing: -0.045em;
-            line-height: 1.05;
-        }
-
-        .status {
-            margin: 1.5rem 0 0;
-            color: var(--brown);
-            font-size: clamp(1rem, 2.5vw, 1.2rem);
-            line-height: 1.7;
-        }
-
-        .status::before {
-            content: "";
-            display: block;
-            width: 38px;
-            height: 1px;
-            margin: 0 auto 1.5rem;
-            background: var(--tan);
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 1rem;
-            }
-
-            main {
-                border-radius: 12px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<body>
-    <main>
+<body class="landing-page">
+    <main class="landing-card">
         <div class="accent" aria-hidden="true"></div>
         <h1>Commonthread</h1>
-        <p class="status">This website is currently in progress</p>
+        <div class="separator" aria-hidden="true"></div>
+        <nav class="main-navigation" aria-label="Main navigation">
+            <a class="nav-button" href="{{ url_for('about') }}">About</a>
+            <a class="nav-button" href="{{ url_for('home') }}">Home</a>
+            <a class="nav-button" href="{{ url_for('data') }}">Data</a>
+        </nav>
     </main>
 </body>
 </html>

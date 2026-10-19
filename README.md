@@ -4,31 +4,32 @@ A minimal, Docker-ready starting point for Commonthread, an interactive universi
 
 ## Current status
 
-The site intentionally contains only:
-- The title **Commonthread**
-- A green, gold, and tan/brown colour scheme
-- The message **This website is currently in progress**
+The site currently contains:
+- A landing/navigation page titled **Commonthread**
+- Shared styling using green, gold, and tan/brown
+- Navigation links to **About**, **Home**, and **Data**
+- Placeholder pages for each destination
 
-No analytics, database, API, or frontend framework has been implemented yet.
+The application is still a scaffold. Analytics, database, and reporting functionality have not yet been implemented.
 
 ## Technology
 
 - Python 3.12
 - Flask
-- HTML and CSS
+- HTML and shared CSS
 - Docker
 
-Flask is used only to serve the placeholder page. This is a deliberately small initial scaffold and can be replaced with the planned React + TypeScript and ASP.NET Core architecture as development progresses.
+Flask currently serves the pages. The intended long-term architecture may introduce React + TypeScript, ASP.NET Core, and SQLite as development progresses.
 
 ## Run locally with Python
 
 Python 3.12 or later is recommended.
 
+Create and activate a virtual environment:
+
 ```bash
 python -m venv .venv
 ```
-
-Activate the virtual environment:
 
 **Windows PowerShell**
 ```powershell
@@ -51,7 +52,7 @@ Open http://localhost:8000.
 
 ## Run with Docker
 
-Build the image from the repository root:
+Build the image from the project root:
 
 ```bash
 docker build -t commonthread .
@@ -70,9 +71,9 @@ Open http://localhost:8000.
 1. Push this repository to GitHub.
 2. In Render, create a new **Web Service** and connect the GitHub repository.
 3. Select **Docker** as the runtime.
-4. Deploy. The container listens on `0.0.0.0:8000`.
+4. Deploy. The container listens on `0.0.0.0` using the `PORT` environment variable (default `8000`).
 
-The application also reads the `PORT` environment variable, allowing the listening port to be configured by the hosting platform.
+The `/health` endpoint returns a simple health status.
 
 ## Project structure
 
@@ -84,8 +85,14 @@ commonthread/
 ├── .dockerignore
 ├── .gitignore
 ├── README.md
+├── static/
+│   └── css/
+│       └── styles.css
 └── templates/
-    └── index.html
+    ├── index.html
+    ├── about.html
+    ├── home.html
+    └── data.html
 ```
 
 ## Licence
