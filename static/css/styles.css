@@ -9,6 +9,16 @@
     --cream: #f7f3e8;
     --text: #26352a;
     --surface: rgba(255, 253, 247, 0.94);
+
+    /* Reusable layout sizing tokens */
+    --panel-width-navigation: 760px;
+    --panel-width-medium: 920px;
+    --panel-width-large: 1440px;
+    --panel-padding-y: clamp(2.5rem, 6vw, 5rem);
+    --panel-padding-x: clamp(1.5rem, 5vw, 4rem);
+    --panel-radius: 18px;
+    --panel-border: 1px solid rgba(111, 80, 56, 0.18);
+    --panel-shadow: 0 24px 70px rgba(35, 75, 54, 0.12);
 }
 
 * {
@@ -23,8 +33,6 @@ body {
 body {
     margin: 0;
     min-height: 100vh;
-    display: grid;
-    place-items: center;
     padding: 2rem;
     color: var(--text);
     background:
@@ -34,16 +42,44 @@ body {
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-.landing-card,
-.content-card {
-    width: min(100%, 760px);
-    padding: clamp(2.5rem, 8vw, 5.5rem) clamp(1.5rem, 6vw, 4.5rem);
+/* Page-level layout primitives */
+.page-shell {
+    min-height: calc(100vh - 4rem);
+    display: grid;
+    place-items: center;
+}
+
+.page-shell--wide {
+    place-items: stretch center;
+}
+
+.page-panel {
+    position: relative;
+    width: 100%;
+    padding: var(--panel-padding-y) var(--panel-padding-x);
     text-align: center;
     background: var(--surface);
-    border: 1px solid rgba(111, 80, 56, 0.18);
+    border: var(--panel-border);
     border-top: 6px solid var(--gold);
-    border-radius: 18px;
-    box-shadow: 0 24px 70px rgba(35, 75, 54, 0.12);
+    border-radius: var(--panel-radius);
+    box-shadow: var(--panel-shadow);
+}
+
+.page-panel--navigation {
+    max-width: var(--panel-width-navigation);
+}
+
+.page-panel--medium {
+    max-width: var(--panel-width-medium);
+}
+
+.page-panel--large {
+    max-width: var(--panel-width-large);
+    min-height: calc(100vh - 4rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .accent {
@@ -71,6 +107,7 @@ h1 {
     background: var(--tan);
 }
 
+/* Reusable navigation and action links */
 .main-navigation {
     display: flex;
     flex-wrap: wrap;
@@ -79,7 +116,7 @@ h1 {
     margin-top: 1.75rem;
 }
 
-.nav-button {
+.button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -89,19 +126,22 @@ h1 {
     background: var(--green);
     border: 1px solid var(--green);
     border-radius: 8px;
+    font: inherit;
     font-size: 1rem;
     font-weight: 600;
     text-decoration: none;
+    cursor: pointer;
     transition: background-color 140ms ease, border-color 140ms ease, transform 140ms ease;
 }
 
-.nav-button:hover {
+.button:hover {
     background: var(--green-deep);
     border-color: var(--green-deep);
     transform: translateY(-1px);
 }
 
-.nav-button:focus-visible {
+.button:focus-visible,
+.back-link:focus-visible {
     outline: 3px solid var(--gold);
     outline-offset: 3px;
 }
@@ -113,15 +153,53 @@ h1 {
     line-height: 1.7;
 }
 
-@media (max-width: 480px) {
+/* Back navigation is positioned relative to the panel, not the viewport. */
+.back-link {
+    position: absolute;
+    top: 1.25rem;
+    left: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    color: var(--green-deep);
+    background: rgba(232, 216, 184, 0.35);
+    border: 1px solid rgba(111, 80, 56, 0.16);
+    border-radius: 50%;
+    font-size: 1.65rem;
+    line-height: 1;
+    text-decoration: none;
+    transition: background-color 140ms ease, transform 140ms ease;
+}
+
+.back-link:hover {
+    background: var(--tan);
+    transform: translateX(-2px);
+}
+
+.panel-content {
+    width: 100%;
+    max-width: 960px;
+    margin-inline: auto;
+}
+
+@media (max-width: 600px) {
     body {
         padding: 1rem;
     }
 
-    .landing-card,
-    .content-card {
+    .page-shell {
+        min-height: calc(100vh - 2rem);
+    }
+
+    .page-panel {
+        padding: 4.5rem 1.25rem 2.5rem;
         border-radius: 12px;
-        padding: 2.5rem 1.25rem;
+    }
+
+    .page-panel--large {
+        min-height: calc(100vh - 2rem);
     }
 
     .main-navigation {
@@ -129,7 +207,12 @@ h1 {
         align-items: stretch;
     }
 
-    .nav-button {
+    .button {
         width: 100%;
+    }
+
+    .back-link {
+        top: 0.85rem;
+        left: 0.85rem;
     }
 }

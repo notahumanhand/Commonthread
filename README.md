@@ -6,9 +6,11 @@ A minimal, Docker-ready starting point for Commonthread, an interactive universi
 
 The site currently contains:
 - A landing/navigation page titled **Commonthread**
-- Shared styling using green, gold, and tan/brown
+- Shared, reusable CSS using green, gold, and tan/brown
 - Navigation links to **About**, **Home**, and **Data**
-- Placeholder pages for each destination
+- Medium-size About and Data panels with back-to-navigation controls
+- A large Home panel with a **Return to Navigation** button
+- Placeholder subtitles on each destination page
 
 The application is still a scaffold. Analytics, database, and reporting functionality have not yet been implemented.
 

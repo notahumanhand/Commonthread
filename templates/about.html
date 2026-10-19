@@ -7,10 +7,14 @@
     <title>About | Commonthread</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<body class="content-page">
-    <main class="content-card">
-        <h1>About</h1>
-        <p class="subtitle">This page is still being built.</p>
+<body>
+    <main class="page-shell">
+        <section class="page-panel page-panel--medium">
+            <a class="back-link" href="{{ url_for('index') }}" aria-label="Return to navigation" title="Return to navigation">‹</a>
+            <div class="accent" aria-hidden="true"></div>
+            <h1>About</h1>
+            <p class="subtitle">This page is still being built.</p>
+        </section>
     </main>
 </body>
 </html>

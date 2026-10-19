@@ -8,16 +8,18 @@
     <title>Commonthread</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<body class="landing-page">
-    <main class="landing-card">
-        <div class="accent" aria-hidden="true"></div>
-        <h1>Commonthread</h1>
-        <div class="separator" aria-hidden="true"></div>
-        <nav class="main-navigation" aria-label="Main navigation">
-            <a class="nav-button" href="{{ url_for('about') }}">About</a>
-            <a class="nav-button" href="{{ url_for('home') }}">Home</a>
-            <a class="nav-button" href="{{ url_for('data') }}">Data</a>
-        </nav>
+<body>
+    <main class="page-shell">
+        <section class="page-panel page-panel--navigation">
+            <div class="accent" aria-hidden="true"></div>
+            <h1>Commonthread</h1>
+            <div class="separator" aria-hidden="true"></div>
+            <nav class="main-navigation" aria-label="Main navigation">
+                <a class="button" href="{{ url_for('about') }}">About</a>
+                <a class="button" href="{{ url_for('home') }}">Home</a>
+                <a class="button" href="{{ url_for('data') }}">Data</a>
+            </nav>
+        </section>
     </main>
 </body>
 </html>

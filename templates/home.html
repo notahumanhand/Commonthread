@@ -4,13 +4,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#234b36">
-    <title>Home | Commonthread</title>
+    <title>Commonthread</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<body class="content-page">
-    <main class="content-card">
-        <h1>Home</h1>
-        <p class="subtitle">This page is still being built.</p>
+<body>
+    <main class="page-shell page-shell--wide">
+        <section class="page-panel page-panel--large">
+            <div class="accent" aria-hidden="true"></div>
+            <h1>Commonthread</h1>
+            <p class="subtitle">This page is still being built.</p>
+            <a class="button" href="{{ url_for('index') }}" style="margin-top: 1.75rem;">Return to Navigation</a>
+        </section>
     </main>
 </body>
 </html>
