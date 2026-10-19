@@ -10,6 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app.py .
 COPY templates/ ./templates/
+COPY static/ ./static/
 
 # Render may supply PORT; default to 8000 for local Docker runs.
 ENV PORT=8000
