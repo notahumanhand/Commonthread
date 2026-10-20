@@ -1,0 +1,104 @@
+{
+  "seed": 20261019,
+  "alumni_count": 1000,
+  "academic_unit_count": 6,
+  "campaign_count": 10,
+  "gift_transaction_count": 4000,
+  "date_min": "2021-07-01",
+  "date_max": "2026-06-30",
+  "qualifying_rule": "status='completed' AND amount_cents > 0",
+  "currency_storage": "integer cents",
+  "fiscal_year": "July 1 through June 30; FY2026 is 2025-07-01 through 2026-06-30",
+  "causal_caveat": "Campaign overlays indicate temporal association only; generated patterns do not establish causal impact.",
+  "checks": {
+    "row_counts": {
+      "academic_units": 6,
+      "alumni": 1000,
+      "campaigns": 10,
+      "gifts": 4000
+    },
+    "foreign_key_violations": 0,
+    "invalid_gift_dates": 0,
+    "qualifying_gift_count": 3964,
+    "qualifying_giving_cents": 99532543,
+    "unique_qualifying_donors": 963,
+    "fy2026_gift_rows": 712,
+    "donors_with_first_qualifying_gift": 963,
+    "non_donors": 37,
+    "donor_date_groups_with_multiple_qualifying_gifts": 3,
+    "refunded_rows": 23,
+    "voided_rows": 13,
+    "campaign_goal_check": [
+      {
+        "campaign_id": "C01",
+        "campaign_name": "First Steps Challenge",
+        "goal_cents": 2000000,
+        "attributed_qualifying_cents": 929626,
+        "attainment_pct": 46.48
+      },
+      {
+        "campaign_id": "C02",
+        "campaign_name": "Founders Circle Initiative",
+        "goal_cents": 18000000,
+        "attributed_qualifying_cents": 26891764,
+        "attainment_pct": 149.4
+      },
+      {
+        "campaign_id": "C03",
+        "campaign_name": "Learning Futures Fund",
+        "goal_cents": 5000000,
+        "attributed_qualifying_cents": 9066051,
+        "attainment_pct": 181.32
+      },
+      {
+        "campaign_id": "C04",
+        "campaign_name": "Winter Giving Week",
+        "goal_cents": 1500000,
+        "attributed_qualifying_cents": 193602,
+        "attainment_pct": 12.91
+      },
+      {
+        "campaign_id": "C05",
+        "campaign_name": "Access for All",
+        "goal_cents": 7000000,
+        "attributed_qualifying_cents": 673202,
+        "attainment_pct": 9.62
+      },
+      {
+        "campaign_id": "C06",
+        "campaign_name": "Tomorrow's Makers",
+        "goal_cents": 12000000,
+        "attributed_qualifying_cents": 1476309,
+        "attainment_pct": 12.3
+      },
+      {
+        "campaign_id": "C07",
+        "campaign_name": "Community Health Appeal",
+        "goal_cents": 4000000,
+        "attributed_qualifying_cents": 6438473,
+        "attainment_pct": 160.96
+      },
+      {
+        "campaign_id": "C08",
+        "campaign_name": "Arts in Reach",
+        "goal_cents": 3500000,
+        "attributed_qualifying_cents": 8476517,
+        "attainment_pct": 242.19
+      },
+      {
+        "campaign_id": "C09",
+        "campaign_name": "Future Scholars Match",
+        "goal_cents": 2500000,
+        "attributed_qualifying_cents": 557914,
+        "attainment_pct": 22.32
+      },
+      {
+        "campaign_id": "C10",
+        "campaign_name": "Quiet Campus Renewal",
+        "goal_cents": 30000000,
+        "attributed_qualifying_cents": 12827261,
+        "attainment_pct": 42.76
+      }
+    ]
+  }
+}
