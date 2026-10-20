@@ -4,16 +4,80 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#234b36">
-    <title>Data | Commonthread</title>
+    <meta name="description" content="Browse and export Commonthread's synthetic gift transaction data.">
+    <title>Raw Data | Commonthread</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="{{ url_for('static', filename='js/data.js') }}" defer></script>
 </head>
 <body>
-    <main class="page-shell">
-        <section class="page-panel page-panel--medium">
+    <main class="page-shell page-shell--wide">
+        <section class="page-panel page-panel--large data-page-panel">
             <a class="back-link" href="{{ url_for('index') }}" aria-label="Return to navigation" title="Return to navigation">‹</a>
-            <div class="accent" aria-hidden="true"></div>
-            <h1>Data</h1>
-            <p class="subtitle">This page is still being built.</p>
+            <div class="data-page-content">
+                <div class="accent" aria-hidden="true"></div>
+                <p class="eyebrow">COMMONTHREAD · DATA EXPLORER</p>
+                <h1 class="data-page-title">Raw gift data</h1>
+                <p class="subtitle data-page-subtitle">Browse, filter, sort, and export the underlying synthetic gift transactions.</p>
+
+                <div class="data-toolbar">
+                    <div class="data-toolbar-copy">
+                        <strong id="result-count" aria-live="polite">Loading records…</strong>
+                        <span>Showing up to 50 records per page. Filters apply to the table and CSV export.</span>
+                    </div>
+                    <button id="export-csv" class="button" type="button">Export filtered CSV</button>
+                </div>
+
+                <section class="filter-panel data-filter-panel" aria-label="Data filters">
+                    <div class="filter-grid data-filter-grid">
+                        <label class="field data-search-field"><span>Search records</span><input id="search" type="search" placeholder="Donor, gift ID, campaign…"></label>
+                        <label class="field"><span>Gift date from</span><input id="start-date" type="date"></label>
+                        <label class="field"><span>Gift date to</span><input id="end-date" type="date"></label>
+                        <label class="field"><span>Academic unit</span><select id="academic-unit"><option value="all">All academic units</option></select></label>
+                        <label class="field"><span>Campaign</span><select id="campaign"><option value="all">All campaigns</option><option value="none">No campaign attribution</option></select></label>
+                        <label class="field"><span>Gift type</span><select id="gift-type"><option value="all">All gift types</option><option value="one_time">One-time</option><option value="recurring">Recurring</option><option value="matching">Matching</option><option value="major_gift">Major gift</option></select></label>
+                        <label class="field"><span>Status</span><select id="status"><option value="all">All statuses</option><option value="completed">Completed</option><option value="refunded">Refunded</option><option value="voided">Voided</option></select></label>
+                        <label class="field"><span>Rows per page</span><select id="page-size"><option value="10">10</option><option value="25">25</option><option value="50" selected>50</option></select></label>
+                    </div>
+                    <div class="data-filter-actions">
+                        <button id="reset-filters" class="text-button" type="button">Reset filters</button>
+                        <span id="filter-status" role="status">Loading filter options…</span>
+                    </div>
+                </section>
+
+                <div class="data-table-panel">
+                    <div class="table-scroll data-table-scroll">
+                        <table class="gift-table data-table">
+                            <thead>
+                                <tr>
+                                    <th><button class="sort-button" data-sort="gift_id" type="button">Gift ID <span></span></button></th>
+                                    <th><button class="sort-button" data-sort="gift_date" type="button">Date <span></span></button></th>
+                                    <th><button class="sort-button" data-sort="donor" type="button">Donor <span></span></button></th>
+                                    <th><button class="sort-button" data-sort="graduation_year" type="button">Grad year <span></span></button></th>
+                                    <th><button class="sort-button" data-sort="unit" type="button">Academic unit <span></span></button></th>
+                                    <th><button class="sort-button" data-sort="campaign" type="button">Campaign <span></span></button></th>
+                                    <th><button class="sort-button" data-sort="amount" type="button">Amount <span></span></button></th>
+                                    <th><button class="sort-button" data-sort="gift_type" type="button">Gift type <span></span></button></th>
+                                    <th><button class="sort-button" data-sort="status" type="button">Status <span></span></button></th>
+                                    <th>Note</th>
+                                </tr>
+                            </thead>
+                            <tbody id="data-table-body">
+                                <tr><td class="empty-cell" colspan="10">Loading records…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="data-pagination">
+                        <span id="page-summary">Page 1</span>
+                        <div class="pagination-controls">
+                            <button class="text-button" id="first-page" type="button" aria-label="First page">« First</button>
+                            <button class="text-button" id="previous-page" type="button">‹ Previous</button>
+                            <button class="text-button" id="next-page" type="button">Next ›</button>
+                            <button class="text-button" id="last-page" type="button">Last »</button>
+                        </div>
+                    </div>
+                </div>
+                <p class="data-disclaimer">Synthetic demonstration data only. Amounts are displayed in USD; the database stores amounts as integer cents. Refunded and voided transactions are included here for transparency.</p>
+            </div>
         </section>
     </main>
 </body>

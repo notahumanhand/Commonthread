@@ -386,6 +386,211 @@ def dashboard_api():
         return jsonify({"error": str(error)}), 500
 
 
+
+# Raw data page: filtering, sorting, pagination, and CSV export.
+DATA_SORT_COLUMNS = {
+    "gift_id": "g.gift_id",
+    "gift_date": "g.gift_date",
+    "donor": "a.last_name",
+    "graduation_year": "a.graduation_year",
+    "unit": "u.unit_name",
+    "campaign": "c.campaign_name",
+    "amount": "g.amount_cents",
+    "gift_type": "g.gift_type",
+    "status": "g.status",
+}
+
+
+def data_query_filters(args):
+    allowed_statuses = {"all", "completed", "refunded", "voided"}
+    allowed_types = {"all", "one_time", "recurring", "matching", "major_gift"}
+    status = args.get("status", "all")
+    gift_type = args.get("gift_type", "all")
+    unit = args.get("academic_unit", "all")
+    campaign = args.get("campaign", "all")
+    search = args.get("search", "").strip()[:120]
+    start_date = args.get("start_date", "").strip()
+    end_date = args.get("end_date", "").strip()
+
+    if status not in allowed_statuses:
+        raise ValueError("Unsupported transaction status.")
+    if gift_type not in allowed_types:
+        raise ValueError("Unsupported gift type.")
+    for value in (start_date, end_date):
+        if value:
+            parse_date(value, date.today())
+    if start_date and end_date and start_date > end_date:
+        raise ValueError("Start date must be on or before end date.")
+
+    clauses = []
+    params = []
+    if status != "all":
+        clauses.append("g.status = ?")
+        params.append(status)
+    if gift_type != "all":
+        clauses.append("g.gift_type = ?")
+        params.append(gift_type)
+    if unit != "all":
+        clauses.append("g.academic_unit_id = ?")
+        params.append(unit)
+    if campaign != "all":
+        if campaign == "none":
+            clauses.append("g.campaign_id IS NULL")
+        else:
+            clauses.append("g.campaign_id = ?")
+            params.append(campaign)
+    if start_date:
+        clauses.append("g.gift_date >= ?")
+        params.append(start_date)
+    if end_date:
+        clauses.append("g.gift_date <= ?")
+        params.append(end_date)
+    if search:
+        clauses.append("""(
+            CAST(g.gift_id AS TEXT) LIKE ? OR
+            (a.first_name || ' ' || a.last_name) LIKE ? OR
+            u.unit_name LIKE ? OR COALESCE(c.campaign_name, '') LIKE ? OR
+            g.gift_type LIKE ? OR g.status LIKE ? OR g.note LIKE ?
+        )""")
+        pattern = f"%{search}%"
+        params.extend([pattern] * 7)
+    return (" AND ".join(clauses) if clauses else "1 = 1"), params
+
+
+DATA_SELECT = """
+    SELECT g.gift_id, g.alumni_id, a.first_name || ' ' || a.last_name AS donor_name,
+           a.graduation_year, g.academic_unit_id, u.unit_name,
+           g.campaign_id, c.campaign_name, g.gift_date, g.amount_cents,
+           g.gift_type, g.status, g.note
+    FROM gifts g
+    JOIN alumni a ON a.alumni_id = g.alumni_id
+    JOIN academic_units u ON u.academic_unit_id = g.academic_unit_id
+    LEFT JOIN campaigns c ON c.campaign_id = g.campaign_id
+"""
+
+
+def get_data_page(connection, args, include_pagination=True):
+    where, params = data_query_filters(args)
+    sort = args.get("sort", "gift_date")
+    direction = args.get("direction", "desc").lower()
+    if sort not in DATA_SORT_COLUMNS:
+        raise ValueError("Unsupported sort column.")
+    if direction not in {"asc", "desc"}:
+        raise ValueError("Sort direction must be asc or desc.")
+    order = DATA_SORT_COLUMNS[sort]
+    order_direction = direction.upper()
+    count = connection.execute(
+        f"""SELECT COUNT(*)
+            FROM gifts g
+            JOIN alumni a ON a.alumni_id = g.alumni_id
+            JOIN academic_units u ON u.academic_unit_id = g.academic_unit_id
+            LEFT JOIN campaigns c ON c.campaign_id = g.campaign_id
+            WHERE {where}""",
+        params,
+    ).fetchone()[0]
+    query = f"{DATA_SELECT} WHERE {where} ORDER BY {order} {order_direction}, g.gift_id DESC"
+    page = 1
+    page_size = 50
+    if include_pagination:
+        try:
+            page = max(1, int(args.get("page", "1")))
+            page_size = int(args.get("page_size", "50"))
+        except ValueError:
+            raise ValueError("Page and page size must be integers.")
+        if page_size not in {10, 25, 50}:
+            raise ValueError("Page size must be 10, 25, or 50.")
+        page = min(page, max(1, (count + page_size - 1) // page_size))
+        query += " LIMIT ? OFFSET ?"
+        params = params + [page_size, (page - 1) * page_size]
+    rows = connection.execute(query, params).fetchall()
+    return {
+        "rows": [dict(row) for row in rows],
+        "total": count,
+        "page": page,
+        "page_size": page_size,
+        "pages": max(1, (count + page_size - 1) // page_size),
+        "sort": sort,
+        "direction": direction,
+    }
+
+
+@app.get("/api/data/options")
+def raw_data_options():
+    connection = get_db_connection()
+    try:
+        units = connection.execute(
+            "SELECT academic_unit_id AS id, unit_name AS name FROM academic_units ORDER BY unit_name"
+        ).fetchall()
+        campaigns = connection.execute(
+            "SELECT campaign_id AS id, campaign_name AS name FROM campaigns ORDER BY campaign_name"
+        ).fetchall()
+        min_date, max_date = connection.execute(
+            "SELECT MIN(gift_date), MAX(gift_date) FROM gifts"
+        ).fetchone()
+        return jsonify({
+            "academic_units": [dict(row) for row in units],
+            "campaigns": [dict(row) for row in campaigns],
+            "min_date": min_date,
+            "max_date": max_date,
+        })
+    finally:
+        connection.close()
+
+
+@app.get("/api/data")
+def raw_data_api():
+    try:
+        connection = get_db_connection()
+        try:
+            return jsonify(get_data_page(connection, request.args))
+        finally:
+            connection.close()
+    except (ValueError, KeyError) as error:
+        return jsonify({"error": str(error)}), 400
+    except FileNotFoundError as error:
+        app.logger.exception("Commonthread database is unavailable")
+        return jsonify({"error": str(error)}), 500
+
+
+@app.get("/api/data/export.csv")
+def raw_data_csv():
+    import csv
+    import io
+
+    try:
+        connection = get_db_connection()
+        try:
+            result = get_data_page(connection, request.args, include_pagination=False)
+        finally:
+            connection.close()
+    except (ValueError, KeyError) as error:
+        return jsonify({"error": str(error)}), 400
+    except FileNotFoundError as error:
+        app.logger.exception("Commonthread database is unavailable")
+        return jsonify({"error": str(error)}), 500
+
+    output = io.StringIO(newline="")
+    writer = csv.writer(output)
+    writer.writerow([
+        "Gift ID", "Alumni ID", "Donor", "Graduation Year",
+        "Academic Unit ID", "Academic Unit", "Campaign ID", "Campaign",
+        "Gift Date", "Amount (USD)", "Gift Type", "Status", "Note",
+    ])
+    for row in result["rows"]:
+        writer.writerow([
+            row["gift_id"], row["alumni_id"], row["donor_name"], row["graduation_year"],
+            row["academic_unit_id"], row["unit_name"], row["campaign_id"] or "",
+            row["campaign_name"] or "", row["gift_date"],
+            f'{row["amount_cents"] / 100:.2f}', row["gift_type"], row["status"], row["note"],
+        ])
+    from flask import Response
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="commonthread-gifts.csv"'},
+    )
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8000"))
     app.run(host="0.0.0.0", port=port, debug=False)
