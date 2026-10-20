@@ -1,102 +1,45 @@
-# Commonthread
+# Commonthread functional Home dashboard update
 
-A minimal, Docker-ready starting point for Commonthread, an interactive university advancement analytics portfolio project.
+This update replaces `app.py`, `templates/home.html`, and `static/css/styles.css`, adds `static/js/home.js`, and updates `Dockerfile` so the SQLite database is included in the container.
 
-## Current status
+## Apply the update
 
-The site currently contains:
-- A landing/navigation page titled **Commonthread**
-- Shared, reusable CSS using green, gold, and tan/brown
-- Navigation links to **About**, **Home**, and **Data**
-- Medium-size About and Data panels with back-to-navigation controls
-- A large Home panel with a **Return to Navigation** button
-- Placeholder subtitles on each destination page
+Copy the supplied files into the matching paths in your repository. Keep the database at:
 
-The application is still a scaffold. Analytics, database, and reporting functionality have not yet been implemented.
+`tools/commonthread_synthetic_data/data/commonthread.sqlite`
 
-## Technology
+The dashboard uses Flask API routes backed by the bundled SQLite database. It opens SQLite in read-only mode. No additional Python dependencies are required beyond the existing Flask and Gunicorn requirements.
 
-- Python 3.12
-- Flask
-- HTML and shared CSS
-- Docker
+## Local test
 
-Flask currently serves the pages. The intended long-term architecture may introduce React + TypeScript, ASP.NET Core, and SQLite as development progresses.
-
-## Run locally with Python
-
-Python 3.12 or later is recommended.
-
-Create and activate a virtual environment:
+From the repository root, install the requirements if needed and run:
 
 ```bash
-python -m venv .venv
-```
-
-**Windows PowerShell**
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-**macOS/Linux**
-```bash
-source .venv/bin/activate
-```
-
-Install dependencies and start the site:
-
-```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 python app.py
 ```
 
-Open http://localhost:8000.
+Open `http://127.0.0.1:8000/home`. API endpoints are:
 
-## Run with Docker
+- `/api/dashboard/options`
+- `/api/dashboard`
+- `/api/dashboard/transactions`
 
-Build the image from the project root:
+The dashboard supports date range, academic unit, graduation cohort, campaign, and gift-type filters; metric and granularity selectors; campaign timeline overlays; campaign goal progress; and click-through from a chart point to the supporting transaction list.
+
+## Docker
+
+The updated Dockerfile copies `tools/commonthread_synthetic_data/data/` into the image. Build from the repository root so this path is inside the Docker build context:
 
 ```bash
 docker build -t commonthread .
-```
-
-Run the container:
-
-```bash
 docker run --rm -p 8000:8000 commonthread
 ```
 
-Open http://localhost:8000.
+## Notes
 
-## Deploy to Render
-
-1. Push this repository to GitHub.
-2. In Render, create a new **Web Service** and connect the GitHub repository.
-3. Select **Docker** as the runtime.
-4. Deploy. The container listens on `0.0.0.0` using the `PORT` environment variable (default `8000`).
-
-The `/health` endpoint returns a simple health status.
-
-## Project structure
-
-```text
-commonthread/
-├── app.py
-├── requirements.txt
-├── Dockerfile
-├── .dockerignore
-├── .gitignore
-├── README.md
-├── static/
-│   └── css/
-│       └── styles.css
-└── templates/
-    ├── index.html
-    ├── about.html
-    ├── home.html
-    └── data.html
-```
-
-## Licence
-
-No licence has been selected yet. Add one before accepting external contributions or distributing the project under explicit open-source terms.
+- Qualifying gifts are `status = 'completed' AND amount_cents > 0`.
+- Fiscal years run July 1 through June 30.
+- First-time donor status is based on the earliest qualifying gift in full university-wide history.
+- Campaign overlay timing is contextual and does not establish causation.
+- The transaction table displays up to 25 matching rows. This is a first functional dashboard iteration, not yet full server-side pagination or CSV export.

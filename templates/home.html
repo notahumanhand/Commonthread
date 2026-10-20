@@ -4,17 +4,87 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#234b36">
-    <title>Commonthread</title>
+    <meta name="description" content="Commonthread synthetic university advancement analytics dashboard.">
+    <title>Home Dashboard | Commonthread</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="{{ url_for('static', filename='js/home.js') }}" defer></script>
 </head>
-<body>
-    <main class="page-shell page-shell--wide">
-        <section class="page-panel page-panel--large">
-            <div class="accent" aria-hidden="true"></div>
-            <h1>Commonthread</h1>
-            <p class="subtitle">This page is still being built.</p>
-            <a class="button" href="{{ url_for('index') }}" style="margin-top: 1.75rem;">Return to Navigation</a>
+<body class="dashboard-body">
+    <main class="dashboard-shell">
+        <header class="dashboard-header">
+            <a class="dashboard-brand" href="{{ url_for('index') }}" aria-label="Commonthread navigation home">
+                <span class="brand-mark" aria-hidden="true">C</span>
+                <span><strong>Commonthread</strong><small>Advancement analytics</small></span>
+            </a>
+            <nav class="dashboard-nav" aria-label="Main navigation">
+                <a class="active" href="{{ url_for('home') }}" aria-current="page">Dashboard</a>
+                <a href="{{ url_for('about') }}">About</a>
+                <a href="{{ url_for('data') }}">Data</a>
+            </nav>
+        </header>
+
+        <section class="dashboard-intro">
+            <div>
+                <p class="eyebrow">UNIVERSITY ADVANCEMENT</p>
+                <h1>Fundraising overview</h1>
+                <p class="intro-copy">Explore giving activity, donor behavior, and campaign timing across the university.</p>
+            </div>
+            <div class="synthetic-notice"><span aria-hidden="true">●</span> Synthetic demonstration data</div>
         </section>
+
+        <section class="filter-panel" aria-labelledby="filters-heading">
+            <div class="section-heading section-heading--compact">
+                <div><h2 id="filters-heading">Report filters</h2><p>All metrics and records reflect the selected filters.</p></div>
+                <button class="text-button" id="reset-filters" type="button">Reset all</button>
+            </div>
+            <div class="filter-grid">
+                <label class="field"><span>Start date</span><input id="start-date" type="date" value="2025-07-01"></label>
+                <label class="field"><span>End date</span><input id="end-date" type="date" value="2026-06-30"></label>
+                <label class="field"><span>Academic unit</span><select id="academic-unit"><option value="all">All academic units</option></select></label>
+                <label class="field"><span>Graduation cohort</span><select id="cohort">
+                    <option value="all">All cohorts</option><option value="recent">Recent · 0–5 years</option><option value="early">Early career · 6–15 years</option><option value="established">Established · 16–30 years</option><option value="senior">Senior · 31+ years</option>
+                </select></label>
+                <label class="field"><span>Campaign</span><select id="campaign"><option value="all">All campaigns</option></select></label>
+                <label class="field"><span>Gift type</span><select id="gift-type">
+                    <option value="all">All gift types</option><option value="one_time">One-time</option><option value="recurring">Recurring</option><option value="matching">Matching</option><option value="major_gift">Major gift</option>
+                </select></label>
+            </div>
+            <div id="active-filter-summary" class="active-filter-summary" aria-live="polite">Loading available filters…</div>
+        </section>
+
+        <section class="kpi-grid" aria-label="Fundraising key performance indicators">
+            <article class="kpi-card"><div class="kpi-label">Total giving</div><div class="kpi-value" id="kpi-giving">—</div><div class="kpi-note">Qualifying gifts in selected period</div></article>
+            <article class="kpi-card"><div class="kpi-label">Unique donors</div><div class="kpi-value" id="kpi-donors">—</div><div class="kpi-note">Distinct donors, not gift count</div></article>
+            <article class="kpi-card"><div class="kpi-label">First-time donors</div><div class="kpi-value" id="kpi-first-time">—</div><div class="kpi-note">First qualifying university gift</div></article>
+            <article class="kpi-card"><div class="kpi-label">Gifts per donor</div><div class="kpi-value" id="kpi-frequency">—</div><div class="kpi-note" id="kpi-gifts-note">— qualifying gifts</div></article>
+        </section>
+
+        <section class="chart-panel" aria-labelledby="trend-heading">
+            <div class="chart-header">
+                <div class="section-heading"><div><p class="eyebrow">GIVING OVER TIME</p><h2 id="trend-heading">Donor and giving trends</h2><p>Change the measure and time bucket to explore different patterns.</p></div></div>
+                <div class="chart-controls">
+                    <label class="field field--inline"><span>Measure</span><select id="metric"><option value="unique_donors">Unique donors</option><option value="first_time_donors">First-time donors</option><option value="total_giving">Total giving</option><option value="amount_per_donor">Amount per donor</option><option value="gifts_per_donor">Gifts per donor</option></select></label>
+                    <label class="field field--inline"><span>Time bucket</span><select id="granularity"><option value="month">Monthly</option><option value="quarter">Quarterly</option><option value="year">Fiscal year</option></select></label>
+                </div>
+            </div>
+            <div class="chart-legend"><span class="legend-line" aria-hidden="true"></span><span id="chart-legend-label">Unique donors</span><label class="overlay-toggle"><input id="show-campaigns" type="checkbox" checked> Show campaign timelines</label></div>
+            <div id="chart-status" class="chart-status" role="status">Loading dashboard data…</div>
+            <div class="chart-wrap"><svg id="trend-chart" viewBox="0 0 1000 390" role="img" aria-label="Interactive time-series chart. Select a point to inspect its supporting gifts."></svg></div>
+            <p class="chart-footnote">Campaign bands indicate timing and attributed giving, not causal impact. Select a data point to inspect supporting qualifying gifts.</p>
+        </section>
+
+        <section class="lower-grid">
+            <article class="content-panel campaign-panel">
+                <div class="section-heading"><div><p class="eyebrow">CAMPAIGN PERFORMANCE</p><h2>Campaigns in the dataset</h2><p>Attributed qualifying gifts compared with each campaign goal.</p></div></div>
+                <div id="campaign-list" class="campaign-list"><p class="muted">Loading campaign performance…</p></div>
+            </article>
+            <article class="content-panel detail-panel" id="detail-panel">
+                <div class="section-heading"><div><p class="eyebrow">DRILL-THROUGH</p><h2 id="detail-heading">Recent qualifying gifts</h2><p id="detail-description">The latest 25 transactions matching the active filters.</p></div></div>
+                <div class="table-scroll"><table class="gift-table"><thead><tr><th>Date</th><th>Donor</th><th>Unit</th><th>Campaign</th><th>Amount</th></tr></thead><tbody id="gift-table-body"><tr><td colspan="5" class="empty-cell">Loading transactions…</td></tr></tbody></table></div>
+                <p class="table-note">Showing up to 25 qualifying gift transactions. Amounts exclude refunded and voided records.</p>
+            </article>
+        </section>
+        <footer class="dashboard-footer"><span>Commonthread · Synthetic demonstration data</span><a href="{{ url_for('index') }}">Return to navigation</a></footer>
     </main>
 </body>
 </html>
