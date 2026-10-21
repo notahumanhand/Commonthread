@@ -289,9 +289,9 @@ h1 {
 .chart-point { fill: #fffdf7; stroke: var(--green); stroke-width: 3; cursor: pointer; transition: r 120ms ease, fill 120ms ease; }
 .chart-point:hover, .chart-point:focus { r: 7; fill: var(--gold); outline: none; }
 .svg-empty { fill: #788075; font-size: 16px; }
-.campaign-band { pointer-events: none; }
+.campaign-band { pointer-events: auto; stroke: rgba(35, 75, 54, 0.18); stroke-width: 0.5; }
 .campaign-band-0 { fill: #d4a843; }.campaign-band-1 { fill: #6b8f71; }.campaign-band-2 { fill: #8ba9b0; }.campaign-band-3 { fill: #c89b8b; }.campaign-band-4 { fill: #b8a4c7; }
-.campaign-band-label { fill: #526253; font-size: 9px; opacity: 0.9; pointer-events: none; }
+.campaign-band-label { fill: #fffdf7; font-size: 9px; font-weight: 700; opacity: 0.98; pointer-events: none; }
 .chart-footnote { margin: 0.5rem 0 0; color: #858a7e; font-size: 0.75rem; line-height: 1.5; }
 .lower-grid { display: grid; grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.6fr); gap: 1rem; margin-top: 1rem; align-items: start; }
 .content-panel { min-width: 0; padding: 1.4rem; }

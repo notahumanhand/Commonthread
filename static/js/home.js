@@ -126,22 +126,54 @@
         const svg = $("trend-chart");
         svg.replaceChildren();
         $("chart-legend-label").textContent = metricLabels[filters.metric];
-        const width = 1000, height = 390;
+
+        const width = 1000;
+        const baseHeight = 390;
         const margin = { top: 28, right: 30, bottom: 70, left: 82 };
         const plotWidth = width - margin.left - margin.right;
-        const plotHeight = height - margin.top - margin.bottom;
+        const visibleCampaigns = $("show-campaigns").checked
+            ? campaigns.filter((campaign) => campaign.end_date >= filters.start_date && campaign.start_date <= filters.end_date)
+            : [];
+
+        const start = new Date(`${filters.start_date}T00:00:00Z`).getTime();
+        const end = new Date(`${filters.end_date}T23:59:59Z`).getTime();
+        const span = Math.max(end - start, 1);
+        const campaignStart = (campaign) => Math.max(0, new Date(`${campaign.start_date}T00:00:00Z`).getTime() - start);
+        const campaignEnd = (campaign) => Math.min(span, new Date(`${campaign.end_date}T23:59:59Z`).getTime() - start);
+
+        // Interval partitioning: reuse a lane only after its previous campaign has ended.
+        const laneEnds = [];
+        const scheduledCampaigns = visibleCampaigns
+            .map((campaign, index) => ({ campaign, index, start: campaignStart(campaign), end: campaignEnd(campaign) }))
+            .filter((item) => item.end >= item.start)
+            .sort((a, b) => a.start - b.start || a.end - b.end)
+            .map((item) => {
+                let lane = laneEnds.findIndex((laneEnd) => laneEnd < item.start);
+                if (lane === -1) lane = laneEnds.length;
+                laneEnds[lane] = item.end;
+                return { ...item, lane };
+            });
+        const laneHeight = 16;
+        const campaignStripHeight = scheduledCampaigns.length ? laneEnds.length * laneHeight + 10 : 0;
+        const height = baseHeight + campaignStripHeight;
+        const plotTop = margin.top + campaignStripHeight;
+        const plotHeight = height - plotTop - margin.bottom;
+
         if (!series.length) {
+            svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
             svg.append(svgNode("text", { x: width / 2, y: height / 2, "text-anchor": "middle", class: "svg-empty" }, "No data for this selection"));
             return;
         }
+
         const values = series.map((point) => Number(point.value ?? 0));
         const maxValue = Math.max(...values, 1);
         const yMax = maxValue * 1.15;
         const xAt = (index) => margin.left + (series.length === 1 ? plotWidth / 2 : index * plotWidth / (series.length - 1));
-        const yAt = (value) => margin.top + plotHeight - (Number(value ?? 0) / yMax) * plotHeight;
+        const yAt = (value) => plotTop + plotHeight - (Number(value ?? 0) / yMax) * plotHeight;
+        svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
 
         for (let i = 0; i <= 4; i += 1) {
-            const y = margin.top + plotHeight - (i / 4) * plotHeight;
+            const y = plotTop + plotHeight - (i / 4) * plotHeight;
             svg.append(svgNode("line", { x1: margin.left, x2: width - margin.right, y1: y, y2: y, class: "chart-gridline" }));
             const tickValue = yMax * i / 4;
             const tickText = (filters.metric === "total_giving" || filters.metric === "amount_per_donor")
@@ -150,25 +182,28 @@
             svg.append(svgNode("text", { x: margin.left - 12, y: y + 4, "text-anchor": "end", class: "chart-axis-label" }, tickText));
         }
 
-        if ($("show-campaigns").checked) {
-            const start = new Date(`${filters.start_date}T00:00:00Z`).getTime();
-            const end = new Date(`${filters.end_date}T23:59:59Z`).getTime();
-            const span = Math.max(end - start, 1);
-            campaigns.filter((campaign) => campaign.end_date >= filters.start_date && campaign.start_date <= filters.end_date).forEach((campaign, index) => {
-                const campaignStart = new Date(`${campaign.start_date}T00:00:00Z`).getTime();
-                const campaignEnd = new Date(`${campaign.end_date}T23:59:59Z`).getTime();
-                const left = margin.left + Math.max(0, campaignStart - start) / span * plotWidth;
-                const right = margin.left + Math.min(span, campaignEnd - start) / span * plotWidth;
-                const x = Math.max(margin.left, left);
-                const rectWidth = Math.max(2, Math.min(width - margin.right, right) - x);
-                svg.append(svgNode("rect", { x, y: margin.top, width: rectWidth, height: plotHeight, class: `campaign-band campaign-band-${index % 5}`, opacity: 0.15 }));
-                if (rectWidth > 34) {
-                    const label = svgNode("text", { x: x + 4, y: margin.top + 12 + (index % 3) * 13, class: "campaign-band-label" }, campaign.name);
-                    label.setAttribute("transform", `translate(0 0)`);
-                    svg.append(label);
-                }
+        scheduledCampaigns.forEach(({ campaign, index, start: campaignOffsetStart, end: campaignOffsetEnd, lane }) => {
+            const x = margin.left + campaignOffsetStart / span * plotWidth;
+            const right = margin.left + campaignOffsetEnd / span * plotWidth;
+            const rectWidth = Math.max(2, right - x);
+            const y = margin.top + lane * laneHeight;
+            const rect = svgNode("rect", {
+                x, y, width: rectWidth, height: 11,
+                rx: 3,
+                class: `campaign-band campaign-band-${index % 5}`,
+                opacity: 0.9
             });
-        }
+            const title = svgNode("title", {}, `${campaign.name} (${campaign.start_date} to ${campaign.end_date})`);
+            rect.append(title);
+            svg.append(rect);
+            if (rectWidth > 50) {
+                svg.append(svgNode("text", {
+                    x: x + 4, y: y + 8,
+                    class: "campaign-band-label",
+                    "font-size": 9
+                }, campaign.name));
+            }
+        });
 
         series.forEach((point, index) => {
             const x = xAt(index);
@@ -185,8 +220,8 @@
             circle.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectPoint(); } });
             svg.append(circle);
         });
-        svg.append(svgNode("line", { x1: margin.left, x2: margin.left, y1: margin.top, y2: margin.top + plotHeight, class: "chart-axis" }));
-        svg.append(svgNode("line", { x1: margin.left, x2: width - margin.right, y1: margin.top + plotHeight, y2: margin.top + plotHeight, class: "chart-axis" }));
+        svg.append(svgNode("line", { x1: margin.left, x2: margin.left, y1: plotTop, y2: plotTop + plotHeight, class: "chart-axis" }));
+        svg.append(svgNode("line", { x1: margin.left, x2: width - margin.right, y1: plotTop + plotHeight, y2: plotTop + plotHeight, class: "chart-axis" }));
     }
 
     async function showPointDetails(point, filters) {
