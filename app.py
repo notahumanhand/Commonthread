@@ -3,7 +3,7 @@ import sqlite3
 from datetime import date
 from pathlib import Path
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 app = Flask(__name__)
 
@@ -280,7 +280,6 @@ def build_dashboard_data(connection, filters):
 
 @app.get("/")
 def index():
-    # The index page is the navigation/landing page, not the Home page.
     return render_template("index.html")
 
 
@@ -291,7 +290,8 @@ def about():
 
 @app.get("/home")
 def home():
-    return render_template("home.html")
+    """Keep legacy dashboard URLs working by redirecting to the homepage."""
+    return redirect(url_for("index"))
 
 
 @app.get("/data")
