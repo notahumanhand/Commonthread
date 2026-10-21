@@ -4,17 +4,106 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#234b36">
+    <meta name="description" content="About Commonthread, its interactive advancement analytics website, and its synthetic dataset.">
     <title>About | Commonthread</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<body>
-    <main class="page-shell">
-        <section class="page-panel page-panel--medium">
-            <a class="back-link" href="{{ url_for('index') }}" aria-label="Return to dashboard" title="Return to dashboard">‹</a>
-            <div class="accent" aria-hidden="true"></div>
-            <h1>About</h1>
-            <p class="subtitle">This page is still being built.</p>
+<body class="dashboard-body">
+    <main class="dashboard-shell">
+        <header class="dashboard-header">
+            <a class="dashboard-brand" href="{{ url_for('index') }}" aria-label="Commonthread dashboard home">
+                <span class="brand-mark" aria-hidden="true">C</span>
+                <span><strong>Commonthread</strong><small>Advancement analytics</small></span>
+            </a>
+            <nav class="dashboard-nav" aria-label="Main navigation">
+                <a href="{{ url_for('index') }}">Dashboard</a>
+                <a class="active" href="{{ url_for('about') }}" aria-current="page">About</a>
+                <a href="{{ url_for('data') }}">Data</a>
+            </nav>
+        </header>
+
+        <section class="dashboard-intro">
+            <div>
+                <p class="eyebrow">ABOUT THE PROJECT</p>
+                <h1>Commonthread</h1>
+                <p class="intro-copy">A synthetic university advancement analytics website for exploring fundraising activity, donor behavior, campaign timing, and gift-level records.</p>
+            </div>
+            <div class="synthetic-notice"><span aria-hidden="true">●</span> Synthetic demonstration data</div>
         </section>
+
+        <article class="content-panel about-content">
+            <p>Commonthread is a synthetic university advancement analytics website. It demonstrates how an advancement team could explore fundraising activity, donor behavior, campaign timing, and gift-level records through an interactive dashboard.</p>
+            <p>All people, academic units, campaigns, locations, and transactions in the included database are fictional. The data is intended for demonstration and development—not as a representation of a real institution or as evidence of real fundraising outcomes.</p>
+
+            <h2>Website</h2>
+            <h3>Advancement dashboard</h3>
+            <p>The dashboard summarizes qualifying giving activity for a selected reporting period. It includes:</p>
+            <ul>
+                <li><strong>Total giving</strong> — the sum of qualifying gift amounts.</li>
+                <li><strong>Unique donors</strong> — distinct alumni with qualifying gifts in the selected period.</li>
+                <li><strong>First-time donors</strong> — alumni whose first qualifying gift to the university falls within the selected period.</li>
+                <li><strong>Gifts per donor</strong> — qualifying gift count divided by unique donors.</li>
+            </ul>
+            <p>Users can filter the dashboard by date range, academic unit, graduation cohort, campaign, and gift type. The trend chart can display unique donors, first-time donors, total giving, amount per donor, or gifts per donor, grouped monthly, quarterly, or by fiscal year. Selecting a chart point displays a supporting list of qualifying gift transactions.</p>
+            <p>The campaign section lists campaigns, attributed qualifying giving, and progress toward each campaign's goal. Campaign dates are shown on the trend chart as timeline bars to provide temporal context. Campaign timing and gift attribution are not proof that a campaign caused a change in giving.</p>
+
+            <h3>Raw gift data explorer</h3>
+            <p>The Data page exposes the underlying synthetic gift transactions. Users can search records and filter by date, academic unit, campaign attribution, gift type, and status. The table supports sorting and pagination, and the currently filtered records can be exported as CSV.</p>
+            <p>The data explorer includes completed, refunded, and voided transaction rows. This makes it possible to inspect nonqualifying records and see how transaction status affects dashboard metrics.</p>
+
+            <h2>Synthetic dataset</h2>
+            <p>The website uses a bundled SQLite database generated specifically for Commonthread. The generator is deterministic for a given random seed, so the baseline dataset can be recreated.</p>
+            <p>The default generation uses seed <code>20261019</code> and creates:</p>
+            <ul>
+                <li>1,000 fictional alumni</li>
+                <li>6 fictional academic units</li>
+                <li>10 fictional fundraising campaigns</li>
+                <li>4,000 gift transaction rows</li>
+                <li>Gift dates from July 1, 2021 through June 30, 2026</li>
+            </ul>
+            <p>The committed baseline dataset contains 3,964 qualifying gifts, representing $995,325.43 in qualifying giving and 963 distinct qualifying donors across the full dataset. It also contains 23 refunded rows and 13 voided rows. These values describe the generated baseline only; dashboard totals change with the selected filters.</p>
+
+            <h3>How the data was generated</h3>
+            <p>The Python generator builds the schema and populates the database using a fixed-seed pseudo-random process. It creates fictional alumni attributes, including graduation year, degree type, academic unit, location, and an engagement score. It then generates gift activity across five fiscal years.</p>
+            <p>The generated giving patterns are intentionally varied rather than uniform:</p>
+            <ul>
+                <li>Alumni have different underlying giving propensities.</li>
+                <li>Graduation cohorts have different participation patterns.</li>
+                <li>Some donors give repeatedly or on a recurring pattern; others give sporadically, and some have no qualifying gifts.</li>
+                <li>Prior giving can increase the likelihood of future giving, while a multi-year gap can reduce it.</li>
+                <li>Gift amounts are right-skewed, with a small number of large gifts.</li>
+                <li>Gift dates are seasonally weighted toward November, December, and June.</li>
+                <li>Campaigns have distinct date ranges, goals, categories, and academic-unit associations. Campaign date ranges can overlap.</li>
+            </ul>
+            <p>The campaign-related patterns are deliberately programmed simulation features. They are not a statistically calibrated model of a real university, and they must not be interpreted as evidence of causal campaign impact. A gift is attributed to a campaign only when its transaction record has a campaign ID; merely occurring during a campaign's active dates does not make a gift campaign-attributed.</p>
+            <p>Names are drawn from a small invented name pool and may repeat. Synthetic locations are generic values and should not be treated as real alumni residence data.</p>
+
+            <h2>Data definitions and reporting rules</h2>
+            <h3>Qualifying gifts</h3>
+            <p>A transaction contributes to the dashboard's qualifying-gift metrics only when:</p>
+            <pre><code>status = 'completed' AND amount_cents &gt; 0</code></pre>
+            <p>Amounts are stored as integer cents to avoid floating-point storage for currency. Refunded and voided records remain available in the data explorer but are excluded from qualifying gift counts and giving totals.</p>
+
+            <h3>Fiscal years</h3>
+            <p>The reporting calendar follows a July–June fiscal year. For example, FY2026 runs from July 1, 2025 through June 30, 2026, inclusive.</p>
+
+            <h3>Metric interpretation</h3>
+            <ul>
+                <li><strong>Total giving:</strong> sum of qualifying gift amounts.</li>
+                <li><strong>Gift count:</strong> number of qualifying gift transactions.</li>
+                <li><strong>Unique donors:</strong> distinct alumni with qualifying gifts in the selected interval.</li>
+                <li><strong>First-time donors:</strong> alumni whose earliest qualifying university-wide gift date falls in the selected interval. First-ever status is determined from the full dataset before applying the dashboard's other filters.</li>
+                <li><strong>Amount per donor:</strong> total qualifying giving divided by unique donors; shown as unavailable when there are no qualifying donors.</li>
+                <li><strong>Gifts per donor:</strong> qualifying gift count divided by unique donors; shown as unavailable when there are no qualifying donors.</li>
+                <li><strong>Campaign attainment:</strong> campaign-attributed qualifying giving divided by the campaign goal.</li>
+            </ul>
+            <p>Monthly unique-donor values are distinct counts within each month. They should not be added together to calculate unique donors across a longer reporting period.</p>
+
+            <h2>Technology and data access</h2>
+            <p>The site is implemented with Python and Flask, HTML templates, CSS, browser-side JavaScript, and SQLite. The Flask application serves the dashboard and data explorer and provides JSON endpoints for filter options, dashboard aggregates, supporting transactions, and raw-data browsing. The database is opened in read-only mode by the application.</p>
+            <p>The repository includes the generator, schema and assumptions documentation, validation SQL, expected baseline checks, and automated data tests so the synthetic dataset and its reporting assumptions can be inspected and reproduced.</p>
+        </article>
+        <footer class="dashboard-footer"><span>Commonthread · Synthetic university advancement analytics</span><a href="{{ url_for('index') }}">Return to dashboard</a></footer>
     </main>
 </body>
 </html>
